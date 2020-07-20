@@ -1,9 +1,0 @@
-type: code
-files:
-- name: task.py
-  visible: true
-  text: '# use the predefined variable "input_str" here'
-  learner_created: false
-feedback_link: https://hyperskill.org/learn/step/6815
-status: Failed
-record: -1
