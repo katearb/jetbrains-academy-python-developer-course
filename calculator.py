@@ -6,34 +6,37 @@ print('Hi, welcome to my calculator.'
 
 
 def prepare_data(input_data):
+    # makes input expression convenient to use: returns a deque with numbers and operators in infix order
     data = []
-    number: str = ''
-    for s in input_data:
-        if s in var_dict.keys():
-            data.append(var_dict[s])
+    number: str = ''  # is needed to save a whole number (not a single digit) as a list-element
+    for symbol in input_data:
+        if symbol in var_dict.keys():
+            data.append(var_dict[symbol])
         else:
             try:
-                int(s)
+                int(symbol)
             except ValueError:
                 if number != '':
                     data.append(number)
                     number = ''
-                data.append(s)
+                data.append(symbol)  # append an operator
 
             else:
-                number += s
+                number += symbol
+
     if len(number) > 0:
         data.append(number)
 
-    if ('(' in data and ')' not in data) or (')' in data and '(' not in data):
+    if ('(' in data and ')' not in data) or (')' in data and '(' not in data):  # check if parentheses are used correct
         print('Invalid expression')
         return False
     else:
+        # convert multiple operators (--, ---, +++, ...) into single one
         new_data = []
         for item in data:
             item = str(item)
 
-            if len(new_data) and item in new_data[-1] and (item == '-' or item == '+'):
+            if len(new_data) and (item in new_data[-1]) and (item == '-' or item == '+'):
                 new_data[-1] += item
             else:
                 new_data.append(item)
@@ -52,12 +55,13 @@ def prepare_data(input_data):
 
 
 def postfix(data):
+    # convert infix notation to reverse Polish notation; return deque
     nums = deque()
     operators = deque()
     priority = {'+': 1, '-': 1, '*': 2, '/': 2, '^': 3}
 
     for item in data:
-        if str(item) not in '+-*/()':
+        if str(item) not in '+-*/()^':
             nums.append(int(item))
         else:
             if len(operators) == 0:
@@ -91,10 +95,12 @@ def postfix(data):
 
     while len(operators) > 0:
         nums.append(operators.pop())
+
     return nums
 
 
 def multi_operations(data):
+    # perform calculation; returns answer
     stack = deque()
     try:
         stack.append(data.popleft())
@@ -134,6 +140,7 @@ def multi_operations(data):
 
 
 def variables_store(data_list):
+    # save values into variables in dictionary
     if data_list.count('=') == 1:
         data_list = data_list.split('=')
         identifier = data_list[0]
@@ -183,9 +190,9 @@ while True:
             print('bye!')
             break
         elif input_data[1:] == 'help':
-            print('This calculator is able to add and subtract many numbers (both positive and negative) '
-                  'and save the result of the operations into variables.'
-                  '\nJust type your expression'
+            print('This calculator is able to add, subtract, multiply, divide and raise to a power numbers (both positive and negative) using parantheses.'
+                  'Moreover, you can save values into variables to use it later.'
+                  '\nJust type your expression. Examples:\n> a = 5,\n> a + 4 - 33,\n> (2 + 33) * 13 - 11'
                   '\nIf you want to close the calculator, type /exit')
             continue
         else:
