@@ -1,165 +1,151 @@
-def input_two_matrices():
-
-    first_matrix_size = input('Enter size of first matrix: ').split()
-    first_matrix = []
-    print('Enter first matrix:\n')
-    for row in range(int(first_matrix_size[0])):
-        first_matrix.append(input().split())
-
-    second_matrix_size = input('Enter size of second matrix: ').split()
-    second_matrix = []
-    print('Enter second matrix:\n')
-    for row in range(int(second_matrix_size[0])):
-        second_matrix.append(input().split())
-
-    return first_matrix_size, second_matrix_size, first_matrix, second_matrix
+from decimal import Decimal
 
 
-def input_matrix():
-    matrix_size = input('Enter size of matrix: ').split()
-
-    matrix = []
+def create_matrix(num):
+    rows, columns = input(f'Enter size of the {num} matrix: ').split()
+    matrix_list = []
     print('Enter matrix: ')
-    for i in range(int(matrix_size[0])):
-        matrix.append(input().split())
+    for i in range(int(rows)):
+        matrix_list.append(input().split())
 
-    return matrix_size, matrix
+    return Matrix(matrix_list)
 
 
-def addition():
-    first_matrix_size, second_matrix_size, first_matrix, second_matrix = input_two_matrices()
+class Matrix:
+    def __init__(self, matrix_list: list):
+        self.matrix = matrix_list
 
-    if first_matrix_size == second_matrix_size:
+    def m_float(self):
+        matrix_float = []
+        for row in self.matrix:
+            matrix_float.append([float(el) for el in row])
+
+        return Matrix(matrix_float)
+
+    def add(self, matrix2):
+        if len(self.matrix) == len(matrix2.matrix) and len(self.matrix[0]) == len(matrix2.matrix[0]):
+            result = []
+
+            for ind_row, row in enumerate(self.matrix):
+                el_addition = []
+                for ind_el, el in enumerate(row):
+                    el_addition.append(float(el) + float(matrix2.matrix[ind_row][ind_el]))
+                result.append(el_addition)
+
+            return Matrix(result)
+        else:
+            return []
+
+    def multiply(self, constant):
         result = []
-        for ind_row, row in enumerate(first_matrix):
-            el_addition = []
-            for ind_el, el in enumerate(row):
-                el_addition.append(str(float(el) + float(second_matrix[ind_row][ind_el])))
-            result.append(el_addition)
+        for row in self.matrix:
+            row_result = []
+            for el in row:
+                row_result.append(str(float(el) * constant))
+            result.append(row_result)
 
-        print('The result is:\n')
-        for row in result:
-            print(' '.join(row))
-    else:
-        print('The operation cannot be performed.')
+        return Matrix(result)
 
+    def multiply_matrices(self, matrix2):
+        if len(self.matrix[1]) == len(matrix2.matrix):
+            new_matrix = []
+            for row in range(int(self.matrix[0][0])):
+                new_matrix.append([])
+                for column in range(len(matrix2.matrix[1][0])):
+                    new_matrix[-1].append(0)
 
-def multiplication_by_number():
-    matrix_size = input('Enter size of matrix: ').split()
+            for ind_row, row in enumerate(new_matrix):
+                for ind_el, el in enumerate(row):
+                    first_m_row = self.matrix[ind_row]
+                    second_m_col = []
+                    for sec_m_row in matrix2:
+                        second_m_col.append(sec_m_row[ind_el])
 
-    matrix = []
-    print('Enter matrix: ')
-    for i in range(int(matrix_size[0])):
-        matrix.append(input().split())
+                    new_el = 0
+                    for i in range(len(first_m_row)):
+                        new_el += float(first_m_row[i]) * float(second_m_col[i])
 
-    number = float(input('Enter constant: '))
+                    new_matrix[ind_row][ind_el] = str(new_el)
 
-    result = []
-    for row in matrix:
-        row_result = []
-        for el in row:
-            row_result.append(str(float(el) * number))
-        result.append(row_result)
+            return Matrix(new_matrix)
+        else:
+            return []
 
-    print('The result is:\n')
-    for row in result:
-        print(' '.join(row))
+    def transpose(self, choice):
+        if choice == '1':
+            result = []
+            for i in range(len(self.matrix)):
+                result.append([])
 
+            for row in self.matrix:
+                for ind_el, el in enumerate(row):
+                    result[ind_el].append(el)
+            return Matrix(result)
 
-def multiplication_matrices():
-    first_matrix_size, second_matrix_size, first_matrix, second_matrix = input_two_matrices()
+        elif choice == '2':
+            result_main = self.transpose('1')
+            main_reverse = []
+            for row in result_main.matrix:
+                main_reverse.append(row[::-1])
+            result = main_reverse[::-1]
 
-    if first_matrix_size[1] == second_matrix_size[0]:
-        new_matrix = []
-        for row in range(int(first_matrix_size[0])):
-            new_matrix.append([])
-            for column in range(int(second_matrix_size[1])):
-                new_matrix[-1].append(0)
+            return Matrix(result)
 
-        for ind_row, row in enumerate(new_matrix):
-            for ind_el, el in enumerate(row):
-                first_m_row = first_matrix[ind_row]
-                second_m_col = []
-                for sec_m_row in second_matrix:
-                    second_m_col.append(sec_m_row[ind_el])
+        elif choice == '3':
+            result = []
+            for row in self.matrix:
+                result.append(row)
+            for ind, row in enumerate(result):
+                result[ind].reverse()
+            return Matrix(result)
 
-                new_el = 0
-                for i in range(len(first_m_row)):
-                    new_el += float(first_m_row[i]) * float(second_m_col[i])
+        elif choice == '4':
+            return Matrix(self.matrix[::-1])
 
-                new_matrix[ind_row][ind_el] = str(new_el)
+        else:
+            print('Unknown command')
+            return []
 
-        for row in new_matrix:
-            print(' '.join(row))
+    def calculate_det(self):
+        if len(self.matrix) == 1:
+            return self.matrix[0][0]
+        else:
+            result = 0
+            indices = list(range(len(self.matrix)))
+            if len(self.matrix) == 2 and len(self.matrix[0]) == 2:
+                result = self.matrix[0][0] * self.matrix[1][1] - self.matrix[1][0] * self.matrix[0][1]
+                return result
 
+            for fc in indices:
+                As = self.matrix[:]
+                As = As[1:]
+                height = len(As)
+                for i in range(height):
+                    As[i] = As[i][0:fc] + As[i][fc + 1:]
+                sign = (-1) ** (fc % 2)
+                sub_det = Matrix(As).calculate_det()
+                result += sign * self.matrix[0][fc] * sub_det
+            return result
 
-def transpose():
-    print('1. Main diagonal\n'
-          '2. Side diagonal\n'
-          '3. Vertical line\n'
-          '4. Horizontal line')
+    def inverse(self):
+        det = self.calculate_det()
+        if det != 0:
+            ct = self.transpose('1')
+            inverse_matrix = ct.multiply(1/det)
+            result = []
+            for i, row in enumerate(inverse_matrix.matrix):
+                result.append([round(float(el), 2) for el in row])
+            return Matrix(result)
+        else:
+            return []
 
-    choice = input('Your choice: ')
-
-    matrix_size, matrix = input_matrix()
-
-    if choice == '1':
-        new_matrix = []
-        for i in range(int(matrix_size[1])):
-            new_matrix.append([])
-
-        for row in matrix:
-            for ind_el, el in enumerate(row):
-                new_matrix[ind_el].append(el)
-    elif choice == '2':
-        new_matrix = []
-        for i in range(int(matrix_size[1])):
-            new_matrix.append([])
-
-        for row in matrix:
-            for ind_el, el in enumerate(row):
-                new_matrix[ind_el].append(el)
-
-        for ind, row in enumerate(matrix):
-            new_matrix[ind].reverse()
-
-        new_matrix.reverse()
-    elif choice == '3':
-        new_matrix = []
-        for row in matrix:
-            new_matrix.append(row)
-        for ind, row in enumerate(new_matrix):
-            new_matrix[ind].reverse()
-    elif choice == '4':
-        new_matrix = matrix[::-1]
-    else:
-        print('Unknown command')
-        return False
-
-    for row in new_matrix:
-        print(' '.join(row))
-
-
-def calculate_determinant():
-    matrix_size, matrix = input_matrix()
-
-    if matrix_size == ['1', '1']:
-        return matrix
-    elif matrix_size == ['2', '2']:
-        answer = int(matrix[0][0]) * int(matrix[1][1]) - int(matrix[0][1]) * int(matrix[1][0])
-    else:
-        m = int(matrix_size[0]) // 2
-        pivot = matrix[m][m]
-
-        pivot_row = matrix[m]
-        pivot_col = []
-        for ind, row in enumerate(matrix):
-            pivot_col.append(matrix[ind][m])
-
-        new_matrix = matrix
-        new_matrix.remove(matrix[m])
-        for ind, row in enumerate(matrix):
-            new_matrix.append(matrix[ind][m])
+    def print_matrix(self):
+        if not self.matrix:
+            print('The operation cannot be performed.')
+        else:
+            print('The result is: ')
+            for row in self.matrix:
+                print(' '.join(list(map(str, row))))
 
 
 while True:
@@ -168,20 +154,56 @@ while True:
           '3. Multiply matrices\n'
           '4. Transpose matrix\n'
           '5. Calculate a determinant\n'
+          '6. Inverse matrix\n'
           '0. Exit')
     choice = input('Your choice: ')
-    
+
     if choice == '1':
-        addition()
+        matrix1 = create_matrix('first')
+        matrix2 = create_matrix('second')
+
+        result = matrix1.add(matrix2)
+        result.print_matrix()
+
     elif choice == '2':
-        multiplication_by_number()
+        matrix = create_matrix('')
+        const = float(input('Enter the number: '))
+
+        result = matrix.multiply(const)
+        result.print_matrix()
+
     elif choice == '3':
-        multiplication_matrices()
+        matrix1 = create_matrix('first')
+        matrix2 = create_matrix('second')
+        result = matrix1.multiply_matrices(matrix2)
+        result.print_matrix()
+
     elif choice == '4':
-        transpose()
+        print('1. Main diagonal\n'
+              '2. Side diagonal\n'
+              '3. Vertical line\n'
+              '4. Horizontal line')
+
+        choice = input('Your choice: ')
+        matrix = create_matrix('')
+        result = matrix.transpose(choice)
+        result.print_matrix()
+
     elif choice == '5':
-        calculate_determinant()
+        matrix = create_matrix('')
+        matrix_float = matrix.m_float()
+        print('The result is:\n', matrix_float.calculate_det())
+
+    elif choice == '6':
+        matrix = create_matrix('')
+        matrix_float = matrix.m_float()
+        result = matrix_float.inverse()
+        if not result:
+            print('This matrix doesn\'t have an inverse')
+        result.print_matrix()
+
     elif choice == '0':
         break
+
     else:
         print('Unknown command')
