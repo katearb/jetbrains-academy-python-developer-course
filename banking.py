@@ -166,7 +166,6 @@ while True:
                                             print('Not enough money.')
                                     else:
                                         print('There are no such card')
-
                             else:
                                 print('You cannot transfer money to the same card')
                         else:
