@@ -124,66 +124,76 @@ while True:
         find_pin = cur.execute(f"SELECT pin FROM card WHERE number = '{card}'")
         find_pin = cur.fetchone()
 
-        if find_pin and find_pin[0] == check_pin:
-            print('You have successfully logged in!')
-            while True:
-                choice2 = input('1. Balance\n'
-                                '2. Add income\n'
-                                '3. Do transfer\n'
-                                '4.Close account\n'
-                                '5.Log out\n'
-                                '0. Exit\n')
-
-                if choice2 == '1':
-                    print('Balance:', check_balance(card))
-                elif choice2 == '2':
-                    add_income = input('Enter income: ')
-                    new_balance = float(check_balance(card)) + float(add_income)
-                    cur.execute(f'UPDATE card SET balance = "{new_balance}" WHERE number = "{card}"')
-                    conn.commit()
-                    print('Income was added.')
-                elif choice2 == '3':
-                    print('-----TRANSFER-----')
-                    trnsfr_acc = input('Enter card number:\n')
-                    check_existence = cur.execute(f'SELECT number FROM card WHERE number = "{trnsfr_acc}"')
-                    check_existence = cur.fetchone()
-
-                    if luhn_algorithm(trnsfr_acc[:-1]) == trnsfr_acc:
-                        if check_existence:
-                            if trnsfr_acc != card:
-                                    trnsfr_acc_check = cur.execute(f'SELECT number FROM card WHERE number = "{number}"')
-                                    trnsfr_acc_check = cur.fetchone()[0]
-
-                                    if trnsfr_acc_check:
-                                        amount = input('Enter amount of money you want to transfer')
-                                        balance = cur.execute(f'SELECT balance FROM card WHERE number = "{card}"')
-                                        balance = cur.fetchone()[0]
-
-                                        if float(balance) >= float(amount):
-                                            transfer_money(card, balance, amount, trnsfr_acc)
-                                            print('Success!')
-                                        else:
-                                            print('Not enough money.')
-                                    else:
-                                        print('There are no such card')
-
-                            else:
-                                print('You cannot transfer money to the same card')
-                        else:
-                            print('Such a card does not exist.')
-                    else:
-                        print('Probably you have made a mistake')
-                elif choice2 == '4':
-                    cur.execute(f'DELETE FROM card WHERE number = "{card}"')
-                    conn.commit()
-                    print('The account has been closed.')
-                elif choice2 == '5':
-                    print('You have successfully logged out!')
-                    break
-                else:
-                    flag = True
-                    break
-        else:
+        if find_pin and find_pin[0] != check_pin:
             print('Wrong card number or PIN!')
+            continue
+
+        print('You have successfully logged in!')
+
+        while True:
+            choice2 = input('1. Balance\n'
+                            '2. Add income\n'
+                            '3. Do transfer\n'
+                            '4.Close account\n'
+                            '5.Log out\n'
+                            '0. Exit\n')
+
+            if choice2 == '1':
+                print('Balance:', check_balance(card))
+
+            elif choice2 == '2':
+                add_income = input('Enter income: ')
+                new_balance = float(check_balance(card)) + float(add_income)
+                cur.execute(f'UPDATE card SET balance = "{new_balance}" WHERE number = "{card}"')
+                conn.commit()
+                print('Income was added.')
+
+            elif choice2 == '3':
+                print('-----TRANSFER-----')
+                trnsfr_acc = input('Enter card number:\n')
+                check_existence = cur.execute(f'SELECT number FROM card WHERE number = "{trnsfr_acc}"')
+                check_existence = cur.fetchone()
+
+                if luhn_algorithm(trnsfr_acc[:-1]) != trnsfr_acc:
+                    print('Probably you have made a mistake')
+                    continue
+
+                if not check_existence:
+                    print('Such a card does not exist.')
+                    continue
+
+                if trnsfr_acc == card:
+                    print('You cannot transfer money to the same card')
+                    continue
+
+                trnsfr_acc_check = cur.execute(f'SELECT number FROM card WHERE number = "{number}"')
+                trnsfr_acc_check = cur.fetchone()[0]
+
+                if not trnsfr_acc_check:
+                    print('There are no such card')
+                    continue
+
+                amount = input('Enter amount of money you want to transfer')
+                balance = cur.execute(f'SELECT balance FROM card WHERE number = "{card}"')
+                balance = cur.fetchone()[0]
+
+                if float(balance) >= float(amount):
+                    transfer_money(card, balance, amount, trnsfr_acc)
+                    print('Success!')
+                else:
+                    print('Not enough money.')
+
+            elif choice2 == '4':
+                cur.execute(f'DELETE FROM card WHERE number = "{card}"')
+                conn.commit()
+                print('The account has been closed.')
+
+            elif choice2 == '5':
+                print('You have successfully logged out!')
+                break
+
+            else:
+                flag = True
+                break
     else:
         break
