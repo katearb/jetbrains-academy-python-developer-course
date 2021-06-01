@@ -141,27 +141,29 @@ def multi_operations(data):
 
 def variables_store(data_list):
     # save values into variables in dictionary
-    if data_list.count('=') == 1:
-        data_list = data_list.split('=')
-        identifier = data_list[0]
-        variable = data_list[1]
-        if not identifier.isalpha():
-            print('Invalid identifier')
-        else:
-            try:
-                variable = int(variable)
-            except ValueError:
-                if variable in var_dict.keys():
-                    var_dict[identifier] = var_dict[variable]
-                elif variable.isalpha():
-                    print('Unknown variable')
-                else:
-                    print('Invalid assignment')
-            else:
-                var_dict[identifier] = variable
-
-    else:
+    if data_list.count('=') != 1:
         print('Invalid assignment')
+        return
+
+    data_list = data_list.split('=')
+    identifier = data_list[0]
+    variable = data_list[1]
+    if not identifier.isalpha():
+        print('Invalid identifier')
+        return
+    
+    try:
+        variable = int(variable)
+    except ValueError:
+        if variable in var_dict.keys():
+            var_dict[identifier] = var_dict[variable]
+        elif variable.isalpha():
+            print('Unknown variable')
+        else:
+            print('Invalid assignment')
+    else:
+        var_dict[identifier] = variable
+
 
 
 var_dict = {}
